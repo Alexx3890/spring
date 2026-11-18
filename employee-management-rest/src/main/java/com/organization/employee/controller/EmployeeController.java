@@ -39,7 +39,7 @@ public class EmployeeController {
      * Operation (c) Part 1: Retrieve all employees using @GetMapping.
      * Returns HTTP 200 OK.
      */
-    @GetMapping("/getAllEmployees")
+    @GetMapping({"", "/", "/getAllEmployees"})
     public ResponseEntity<List<Employee>> getAllEmployees() {
         List<Employee> list = employeeService.getAllEmployees();
         return ResponseEntity.ok(list);

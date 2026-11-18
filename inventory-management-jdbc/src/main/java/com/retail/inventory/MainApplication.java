@@ -25,7 +25,7 @@ public class MainApplication {
 
     public static void main(String[] args) {
         System.out.println("===============================================================");
-        System.out.println("  WELCOME TO RETAIL INVENTORY MANAGEMENT SYSTEM (JDBC & MySQL)");
+        System.out.println("  WELCOME TO RETAIL INVENTORY MANAGEMENT SYSTEM (JDBC & PostgreSQL)");
         System.out.println("===============================================================");
 
         try {

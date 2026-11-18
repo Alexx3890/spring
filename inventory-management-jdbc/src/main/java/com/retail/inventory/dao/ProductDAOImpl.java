@@ -51,9 +51,13 @@ public class ProductDAOImpl implements ProductDAO {
 
             int rows = ps.executeUpdate();
             return rows > 0;
-        } catch (SQLIntegrityConstraintViolationException e) {
-            System.err.println(">> [SQL CONSTRAINT ERROR] Duplicate product ID encountered: " + product.getProductId());
-            return false;
+        } catch (SQLException e) {
+            // Check for unique key violation across MySQL (1062 / 23000) and PostgreSQL (23505)
+            if ("23505".equals(e.getSQLState()) || "23000".equals(e.getSQLState()) || e instanceof SQLIntegrityConstraintViolationException) {
+                System.err.println(">> [SQL CONSTRAINT ERROR] Duplicate product ID encountered: " + product.getProductId());
+                return false;
+            }
+            throw e;
         }
     }
 
@@ -125,11 +129,11 @@ public class ProductDAOImpl implements ProductDAO {
 
     @Override
     public boolean updateProductPrice(int productId, double newPrice) throws SQLException {
-        if (!productExists(productId)) {
-            return false;
-        }
         if (newPrice <= 0.0) {
             throw new IllegalArgumentException("Price must be strictly greater than zero.");
+        }
+        if (!productExists(productId)) {
+            return false;
         }
 
         String sql = "UPDATE Product SET price = ? WHERE product_id = ?";

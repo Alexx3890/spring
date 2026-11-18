@@ -1,7 +1,7 @@
 # Enterprise Backend Systems: JDBC Inventory & Spring Boot REST API
 
 This repository contains full implementations and test suites for two academic/enterprise assessment modules:
-1. **Module 1 (CO4 — 10 Marks):** Inventory Management System using **Java JDBC and MySQL**
+1. **Module 1 (CO4 — 10 Marks):** Inventory Management System using **Java JDBC and PostgreSQL** (with embedded H2 / MySQL dual-compatibility)
 2. **Module 2 (CO5 — 10 Marks):** Employee Management System using **Spring Boot REST API**
 
 ---
@@ -12,7 +12,7 @@ This repository contains full implementations and test suites for two academic/e
   - [Option A: One-Click Postman Collection Import (Recommended)](#option-a-one-click-postman-collection-import-recommended)
   - [Option B: Manual Postman Setup (Step-by-Step for Every Endpoint)](#option-b-manual-postman-setup-step-by-step)
 - [Equivalent cURL Commands](#3-equivalent-curl-commands)
-- [Module 1: JDBC Inventory Management System Guide](#4-module-1-inventory-management-system-jdbc--mysql)
+- [Module 1: JDBC Inventory Management System Guide](#4-module-1-inventory-management-system-jdbc--postgresql)
 - [Automated Test Execution (JUnit & MockMvc)](#5-automated-test-execution)
 
 ---
@@ -314,12 +314,12 @@ curl -X DELETE http://localhost:8080/api/employees/9999
 
 ---
 
-## 4. Module 1: Inventory Management System (JDBC & MySQL)
+## 4. Module 1: Inventory Management System (JDBC & PostgreSQL)
 
 ### Console Menu Options
 ```text
 ===============================================================
-  WELCOME TO RETAIL INVENTORY MANAGEMENT SYSTEM (JDBC & MySQL)
+  WELCOME TO RETAIL INVENTORY MANAGEMENT SYSTEM (JDBC & PostgreSQL)
 ===============================================================
 1. [Operation A] Insert Product Records (Single or 3-Batch)
 2. [Operation B] View Low-Stock Products by Category (< 20)
@@ -330,28 +330,28 @@ curl -X DELETE http://localhost:8080/api/employees/9999
 7. Exit
 ```
 
-### MySQL Database Setup
-If using a standalone MySQL server, run `retail_db.sql` in MySQL Workbench or CLI:
+### PostgreSQL Database Setup
+The application is pre-configured to connect directly to PostgreSQL. The schema is defined in `retail_db.sql`:
 ```sql
-CREATE DATABASE IF NOT EXISTS retail_db;
-USE retail_db;
+CREATE DATABASE retail_db;
 
 CREATE TABLE IF NOT EXISTS Product (
     product_id INT PRIMARY KEY,
     product_name VARCHAR(100) NOT NULL,
     category VARCHAR(50) NOT NULL,
     quantity INT NOT NULL DEFAULT 0,
-    price DOUBLE NOT NULL
+    price DOUBLE PRECISION NOT NULL
 );
 ```
 
 Configure your credentials in `inventory-management-jdbc/src/main/resources/db.properties`:
 ```properties
-db.url=jdbc:mysql://localhost:3306/retail_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
-db.user=root
-db.password=root
+db.driver=org.postgresql.Driver
+db.url=jdbc:postgresql://localhost:5432/retail_db
+db.user=postgres
+db.password=0001
 ```
-*(Note: If MySQL is offline, the system automatically falls back to embedded H2 in MySQL mode so you can run and demonstrate without interruptions!)*
+> **Automatic Schema & Fallback:** When the application connects to PostgreSQL, it automatically verifies that the `Product` table exists and seeds starter records if empty. If PostgreSQL is offline, it seamlessly falls back to embedded H2 (in PostgreSQL mode).
 
 ---
 

@@ -1,11 +1,14 @@
 package com.retail.inventory;
 
+import com.retail.inventory.config.DatabaseConnection;
 import com.retail.inventory.dao.ProductDAO;
 import com.retail.inventory.dao.ProductDAOImpl;
 import com.retail.inventory.model.Product;
 import org.junit.jupiter.api.*;
 
+import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -16,25 +19,41 @@ public class InventorySystemTest {
     private static ProductDAO productDAO;
 
     @BeforeAll
-    public static void setUp() {
+    public static void setUp() throws SQLException {
         productDAO = new ProductDAOImpl();
+        try (Connection conn = DatabaseConnection.getConnection();
+             Statement stmt = conn.createStatement()) {
+            stmt.executeUpdate("DELETE FROM Product WHERE product_id IN (301, 302, 303, 304)");
+        }
+    }
+
+    private void ensureTestProduct(int id, String name, String category, int qty, double price) throws SQLException {
+        if (!productDAO.productExists(id)) {
+            productDAO.insertProduct(new Product(id, name, category, qty, price));
+        }
     }
 
     @Test
     @Order(1)
     @DisplayName("(a) Insert Product Records and Duplicate Handling")
     public void testInsertProductsAndDuplicateHandling() throws SQLException {
-        // Insert product 301
+        // Clean any residual
+        try (Connection conn = DatabaseConnection.getConnection();
+             Statement stmt = conn.createStatement()) {
+            stmt.executeUpdate("DELETE FROM Product WHERE product_id IN (301, 302, 303)");
+        }
+
+        // Insert product 301 using PreparedStatement
         Product p1 = new Product(301, "Test Gaming Monitor", "Electronics", 10, 299.99);
         boolean inserted1 = productDAO.insertProduct(p1);
         assertTrue(inserted1, "Product 301 should be inserted successfully.");
 
-        // Insert duplicate product 301 - should be handled and return false
+        // Insert duplicate product 301 - should be handled gracefully and return false
         Product duplicate = new Product(301, "Duplicate Monitor", "Electronics", 5, 199.99);
         boolean insertedDuplicate = productDAO.insertProduct(duplicate);
         assertFalse(insertedDuplicate, "Duplicate product ID 301 should be rejected.");
 
-        // Insert product 302 and 303 (ensuring at least three products are inserted)
+        // Insert product 302 and 303 (at least three product records)
         Product p2 = new Product(302, "Test Bluetooth Speaker", "Electronics", 12, 49.99);
         Product p3 = new Product(303, "Test HDMI Cable", "Electronics", 50, 15.00);
         productDAO.insertProduct(p2);
@@ -49,6 +68,9 @@ public class InventorySystemTest {
     @Order(2)
     @DisplayName("(b) Conditional Retrieval and Sorting (quantity < 20, ORDER BY price DESC)")
     public void testConditionalRetrievalAndSorting() throws SQLException {
+        ensureTestProduct(301, "Test Gaming Monitor", "Electronics", 10, 299.99);
+        ensureTestProduct(302, "Test Bluetooth Speaker", "Electronics", 12, 49.99);
+
         List<Product> results = productDAO.getProductsByCategoryAndLowStock("Electronics", 20);
         assertNotNull(results);
         assertFalse(results.isEmpty(), "Should retrieve electronics with quantity < 20");
@@ -74,8 +96,11 @@ public class InventorySystemTest {
         boolean nonExistent = productDAO.updateProductStock(99999, 10);
         assertFalse(nonExistent, "Updating non-existent product should return false");
 
-        // Update product 301: initial quantity was 10, add 15 -> should become 25
+        // Ensure product 301 exists
+        ensureTestProduct(301, "Test Gaming Monitor", "Electronics", 10, 299.99);
+
         Product before = productDAO.getProductById(301);
+        assertNotNull(before);
         int initialQty = before.getQuantity();
 
         boolean updated = productDAO.updateProductStock(301, 15);
@@ -89,6 +114,9 @@ public class InventorySystemTest {
     @Order(4)
     @DisplayName("(d) Search and Modify Product Details (Price Update)")
     public void testSearchAndModifyPrice() throws SQLException {
+        // Ensure product 301 exists
+        ensureTestProduct(301, "Test Gaming Monitor", "Electronics", 10, 299.99);
+
         // Verify non-existent product
         boolean nonExistent = productDAO.updateProductPrice(99999, 50.0);
         assertFalse(nonExistent, "Updating price of non-existent product should return false");
@@ -104,6 +132,7 @@ public class InventorySystemTest {
         assertTrue(updated, "Price update should succeed");
 
         Product refreshed = productDAO.getProductById(301);
+        assertNotNull(refreshed);
         assertEquals(newPrice, refreshed.getPrice(), 0.001, "Price must reflect the new value");
     }
 
@@ -111,15 +140,22 @@ public class InventorySystemTest {
     @Order(5)
     @DisplayName("(e) Aggregate Query and Conditional Deletion")
     public void testAggregateAndConditionalDeletion() throws SQLException {
+        // Ensure items exist
+        ensureTestProduct(301, "Test Gaming Monitor", "Electronics", 25, 349.99);
+
         // Test Aggregate Query SUM(quantity * price)
         double totalVal = productDAO.calculateTotalInventoryValue();
         assertTrue(totalVal > 0.0, "Total inventory value must be greater than zero");
 
-        // Insert a zero-quantity product
+        // Insert/ensure a zero-quantity product
+        try (Connection conn = DatabaseConnection.getConnection();
+             Statement stmt = conn.createStatement()) {
+            stmt.executeUpdate("DELETE FROM Product WHERE product_id = 304");
+        }
         Product zeroStockProduct = new Product(304, "Defective Keyboard Unit", "Electronics", 0, 75.00);
         productDAO.insertProduct(zeroStockProduct);
 
-        // Attempt to delete a product with stock > 0 (e.g. 301 with qty 25) -> should be blocked
+        // Attempt to delete a product with stock > 0 (e.g. 301 with qty 25) -> must be blocked
         assertThrows(IllegalStateException.class, () -> {
             productDAO.deleteProductIfZeroStock(301);
         }, "Deleting a product with quantity > 0 must throw IllegalStateException");
@@ -130,4 +166,3 @@ public class InventorySystemTest {
         assertFalse(productDAO.productExists(304), "Product 304 should no longer exist in the database");
     }
 }
-

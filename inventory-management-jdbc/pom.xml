@@ -11,7 +11,7 @@
     <packaging>jar</packaging>
 
     <name>Retail Inventory Management System - JDBC</name>
-    <description>Scenario-Based Inventory Management System using Java JDBC and MySQL (CO4)</description>
+    <description>Scenario-Based Inventory Management System using Java JDBC and PostgreSQL (CO4)</description>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -20,14 +20,21 @@
     </properties>
 
     <dependencies>
-        <!-- MySQL Connector/J -->
+        <!-- PostgreSQL JDBC Driver -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.7.11</version>
+        </dependency>
+
+        <!-- MySQL Connector/J (Kept for dual-database compatibility) -->
         <dependency>
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
             <version>9.7.0</version>
         </dependency>
 
-        <!-- H2 Database Engine (Local fallback when MySQL server is unavailable) -->
+        <!-- H2 Database Engine (Local fallback when PostgreSQL server is unavailable) -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
@@ -45,6 +52,13 @@
 
     <build>
         <plugins>
+            <!-- Maven Surefire Plugin with JUnit 5 support -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
+            </plugin>
+
             <!-- Exec Maven Plugin to run MainApplication directly via maven -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
