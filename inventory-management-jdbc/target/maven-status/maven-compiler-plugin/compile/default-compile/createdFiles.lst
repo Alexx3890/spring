@@ -1,0 +1,5 @@
+com\retail\inventory\dao\ProductDAO.class
+com\retail\inventory\dao\ProductDAOImpl.class
+com\retail\inventory\model\Product.class
+com\retail\inventory\config\DatabaseConnection.class
+com\retail\inventory\MainApplication.class

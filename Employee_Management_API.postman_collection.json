@@ -1,0 +1,231 @@
+{
+  "info": {
+    "_postman_id": "e8a32b21-829d-4819-bf93-9c8e146a89c1",
+    "name": "Employee Management REST API (Spring Boot)",
+    "description": "Collection to test all endpoints for the Spring Boot Employee Management System (CO5 - 10 Marks)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Create Employee (201 Created)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Jane Doe\",\n  \"department\": \"Engineering\",\n  \"salary\": 85000.00\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/employees",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "employees"
+          ]
+        },
+        "description": "Operation (b): Add a new employee using @PostMapping and @RequestBody."
+      },
+      "response": []
+    },
+    {
+      "name": "2. Validation Failure (400 Bad Request)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"\",\n  \"department\": \"\",\n  \"salary\": -100.00\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/employees",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "employees"
+          ]
+        },
+        "description": "Validates blank names and negative salaries, returning 400 Bad Request."
+      },
+      "response": []
+    },
+    {
+      "name": "3. Get All Employees (200 OK)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/employees",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "employees"
+          ]
+        },
+        "description": "Operation (c): Retrieve all employees using @GetMapping."
+      },
+      "response": []
+    },
+    {
+      "name": "4. Get Employee by ID (200 OK)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/employees/101",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "employees",
+            "101"
+          ]
+        },
+        "description": "Operation (c): Retrieve a specific employee by ID using @GetMapping."
+      },
+      "response": []
+    },
+    {
+      "name": "5. Get Employee by ID - Not Found (404 Not Found)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/employees/9999",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "employees",
+            "9999"
+          ]
+        },
+        "description": "Demonstrates 404 response when querying a non-existent employee ID."
+      },
+      "response": []
+    },
+    {
+      "name": "6. Update Employee (200 OK)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Alice Johnson\",\n  \"department\": \"VP of Engineering\",\n  \"salary\": 135000.00\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/employees/101",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "employees",
+            "101"
+          ]
+        },
+        "description": "Operation (d): Update an employee's details using @PutMapping."
+      },
+      "response": []
+    },
+    {
+      "name": "7. Update Employee - Not Found (404 Not Found)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Ghost User\",\n  \"department\": \"Unknown\",\n  \"salary\": 50000.00\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/employees/9999",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "employees",
+            "9999"
+          ]
+        },
+        "description": "Demonstrates 404 response when attempting to update an ID that does not exist."
+      },
+      "response": []
+    },
+    {
+      "name": "8. Delete Employee by ID (200 OK)",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/employees/102",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "employees",
+            "102"
+          ]
+        },
+        "description": "Operation (e): Delete an employee by ID using @DeleteMapping."
+      },
+      "response": []
+    },
+    {
+      "name": "9. Delete Employee - Not Found (404 Not Found)",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/employees/9999",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "employees",
+            "9999"
+          ]
+        },
+        "description": "Demonstrates 404 response when attempting to delete an ID that does not exist."
+      },
+      "response": []
+    }
+  ]
+}
+
